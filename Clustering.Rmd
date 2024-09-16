@@ -1,0 +1,372 @@
+---
+title: "Determinación de perfiles clínicos de salud mental en pacientes asegurados a EsSalud en época de pandemia"
+author: "Galvan, J.; Soto, P.; Vásquez, C.; Vega, C. y Zavaleta, D."
+date: "`r Sys.Date()`"
+output:
+  ioslides_presentation:
+    template: quarterly_report.html
+    # pandoc_args: [
+    #   "--title-prefix", "Foo",
+    #   "--id-prefix", "Bar"
+    # ]
+    widescreen: true
+    smaller: true
+    transition: slower
+    logo: unalm.png
+runtime: shiny
+institute: "Fuente: Estudio Primario realizado en EsSalud (enlace: https://assets.researchsquare.com/files/rs-151028/v1_covered.pdf?c=1631853439)"
+classoption: aspectratio=169
+header-includes:
+- \usepackage{multicol,ragged2e,lipsum,etoolbox,scrextend,lmodern}
+- \titlegraphic{\centering \includegraphics[width=5cm]{unalm.jpg}}
+- \definecolor{greeen}{RGB}{66,144,94} # definir color
+- \setbeamercolor{palette primary}{use=structure,fg=white,bg=greeen} # cambiar color
+
+
+
+---
+
+# Introducción
+
+## Situación problemática
+
+\footnotesize
+
+```{r setup, eval = T, include=FALSE, message=F, warning=F, echo=F, comment=NA}
+options(scipen = 9999,
+        max.print = 9999,
+        digits = 2)
+system.file("templates", "component.html", package = "mypackage")
+myComponent <- function(name = "component") {
+  htmlTemplate(
+    system.file("templates", "component.html", package = "mypackage"),
+    name = name
+  )
+}
+```
+
+- Durante la pandemia del COVID-19 los problemas de salud mental sufrieron un incremento importante.
+
+- Aunque muchos problemas son agudos y remiten espontánemanete, el riesgo es que cronifiquen y constituyan una importante carga de enfermedad para las personas y familias.
+
+- El seguro social de salud del Perú (EsSalud), a través de su Gerencia de Oferta Flexible, está interesado en impletar un programa de intervención temprana de personas. Para tal fin, plantea realizar evaluaciones psicológicas remotas más detalladas a sus pacientes adscritos al H. Rebagliati. 
+
+- Dado que no cuenta con recursos para realizar evaluaciones a todos sus pacientes, sería importante segmentar a los pacientes de acuerdo a perfiles clínicos de problemas de salud mental de tal forma que pueda identificar a qué pacientes debería realizar evaluaciones psicológicas detallas primero y a quienes solo podría dar consejería. 
+
+## Objetivo del presente análisis:
+
+- Segmentar a los pacientes en grupos de acuerdo a sus perfiles clínicos de salud mental. 
+
+# Descripción de los datos
+
+## Variables principales (para clustering):
+
+\footnotesize
+
+- 7 ítems de escala psicométrica Fear of COVID-19 Scale (FCV-19S) para evaluar Miedo a COVID-19.
+
+- 22 ítems de escala psicométrica Impact of Events Scale-Revised (IES-R) para evaluar síntomas de trastorno de estrés post-traumático.
+
+- 9 ítems de escala Patient Health QUestionnaire (PHQ-9) para evaluar síntomas de trastorno depresivo.
+
+- 7 ítems de escala Generalized Anxiety Disorder Scale-7 (GAD-7) para evaluar síntomas de trastorno ansioso
+
+## Variables auxiliares: 
+
+- Características socio-demográfiacs: sexo, estado civil, nivel educativo, estado de empleo, historia de problemas de salud mental, religión que profesa.
+
+# Metodología
+
+## Diseño de estudio
+
+Se realizó un estudio transversal que incluyó el uso de cuestionarios autoinformados.
+Se obtuvieron datos demográficos y sociales de los participantes. La ansiedad, el miedo al COVID-19, la depresión y el estrés postraumático se midieron mediante cuestionarios validados y sistemas de puntuación. La recolección de datos se llevó a cabo durante una semana, del 17 al 23 de abril de 2020, un mes después de que se declaró el estado de emergencia y se ordenó la autocuarentena obligatoria en Perú.
+
+## Participantes
+
+Se recopiló información de adultos residentes en Lima, la capital del Perú y la ciudad más poblada del país. Los criterios de inclusión incluyeron: 18 a 80 años y un acuerdo para participar en la encuesta en línea. Los participantes se dividieron en dos grupos: población general y trabajadores de la salud.
+
+## Métodos de clusterización
+
+### Algoritmo K-modes
+
+El algoritmo de agrupación de K-medias no puede agrupar datos categóricos debido a la medida de disimilitud que utiliza. El algoritmo de agrupación en clústeres de K-modes se basa en el paradigma de K-means, pero elimina la limitación de datos numéricos. Por otro lado, el algoritmo K-modes ​​reemplaza a la distancia euclidiana con medición de similitud para un conjunto de datos binarios como el Distancia de Jaccard (Kuo 2018): (i) Usando una simple medida de disimilitud para datos categóricos y (ii) Reemplazo de medias de clústeres por sus modas.
+
+La medida de disimilitud coincidente se puede definir como sigue. Sean X e Y dos objetos de datos categóricos descritos por F categórico. La medida de disimilitud de (X, Y) entre X e Y puede definirse por los desajustes totales de las categorías de atributos correspondientes de dos objetos. Más pequeño el número de desajustes, más similares son los dos objetos. Matemáticamente, podemos decir. (Shehroz & Shri 2007)
+
+## Métodos de clusterización
+
+### Algoritmos k-means y x-means
+
+Algoritmo X-means
+En el algoritmo de k-means, el número de grupos k es un parámetro de entrada especificado por el usuario. Para revelar el verdadero número de clústeres subyacentes a la distribución, Pelleg & Moore (2000) propusieron el algoritmo X - means (Gan et al. 2007). El algoritmo X - means aparece después de la ejecución de cada k-means, tomando decisiones locales sobre qué subconjunto de los centroides actuales deben dividirse para lograr un mejor ajuste. X-Means funciona aplicando alternativamente dos operaciones: (i) el algoritmo K-Means (Mejorar-parámetros) para detectar de manera óptima los grupos para un valor elegido de k.
+
+En esta etapa se corre un K means convencional hasta la convergencia , y la división de grupos (Mejorar-estructura) para optimizar el valor de k de acuerdo con el Criterio de información (Pelleg & Moore 2000). La decisión de división se realiza a través del Criterio de Informacion Bayesiano (BIC, por sus siglas en inglés ) (Pelleg & Moore 2000). 
+
+---
+
+El criterio de Schwarz se utiliza en x-means globalmente para elegir el mejor modelo que encuentra y localmente para guiar todas las divisiones de centroides. El algoritmo es descrito por Gan et al. (2007).
+
+Dado un rango para k, [kmin, kmax], el algoritmo de x-means comienza con k = kmin y continúa agregando centroides cuando son necesarios hasta que se alcanza el límite superior. Los nuevos centroides se agregan dividiendo algunos centroides en dos de acuerdo con el criterio de Schwarz. Durante el proceso, el conjunto de centroides con la mejor puntuación se registra como el resultado final. El algoritmo se puede implementar de manera eficiente utilizando ideas de "listas negras" (Pelleg y Moore, 1999) y árboles kd.
+
+## Validación de los clusters
+
+- K-modes: Índice de Dunn.
+
+- K-means: Bootstrap, Índice de Dunn, Estadístico de Hopkins.
+
+- X-means: Selección de hiperparámetros.
+
+# Resultados
+
+## K-means
+
+*Caracterización por variables sociodemográficas*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p6.png")
+```
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p6.jpg}
+
+\end{center}
+
+
+
+## K-modes
+
+*Caracterización por variables sociodemográficas (continuación)*
+
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p1.png")
+```
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p1.jpg}
+
+\end{center}
+
+
+## K-modes
+
+*Caracterización por PHQ*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p2.png")
+```
+
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p2.jpg}
+
+\end{center}
+
+
+## K-modes
+
+*Caracterización por GAD*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p3.png")
+```
+
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p3.jpg}
+
+\end{center}
+
+
+## K-modes
+
+*Caracterización por IES*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p4.png")
+```
+
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p4.jpg}
+
+\end{center}
+
+## K-modes
+
+*Caracterización por IES (continuación)*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p5.png")
+```
+
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p5.jpg}
+
+\end{center}
+
+
+## K-means
+
+*Caracterización por variables sociodemográficas*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p8.png")
+```
+
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p8.jpg}
+
+\end{center}
+
+
+## K-means
+
+*Caracterización por variables sociodemográficas  (continuación)*
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p7.jpg}
+
+\end{center}
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p7.png")
+```
+
+
+
+## K-means
+
+*Caracterización por variables PQG, GAD e IES*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p9.png")
+```
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p9.jpg}
+
+\end{center}
+
+
+
+## K-means
+
+*Gráfico de cluster*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p10.png")
+```
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p10.jpg}
+
+\end{center}
+
+
+## K-means
+
+*PCA 3d*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p11.png")
+```
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p11.jpg}
+
+\end{center}
+
+
+## X-means
+
+*Caracterización por variables sociodemográficas*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p14.png")
+```
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p14.jpg}
+
+\end{center}
+
+## X-means
+
+*Caracterización por variables sociodemográficas (continuación)*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p12.png")
+```
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p12.jpg}
+
+\end{center}
+
+## X-means
+
+*Caracterización por variables PQG, GAD e IES*
+
+```{r echo=FALSE,eval=T, out.height="400px", out.width="800px"}
+knitr::include_graphics("p13.png")
+```
+
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{p13.jpg}
+
+\end{center}
+
+## Discusión
+
+Cuando se aplicó los algoritmos K-modes y K-means, se obtuvo 3 clusters. Los clústeres se caracterizaron por tener los siguientes patrones: 
+
+Cluster 1 (Grupo bajo riesgo de problema de salud mental): Contiene la mayor parte de pacientes, estos se caracterizan por ser en su mayoría hombres, mayor pertenencia de un empleo formal, de los viudos, casi en su totalidad pertenecen a este grupo, así también, en este grupo se encuentran las personas que no sufren de ansiedad, asimismo en su mayoría los que no tienen problemas de depresión también pertenecen a este grupo. Asimismo, este grupo tiene los puntajes promedios de cada item de problemas de salud mental mas bajos que todos.
+
+Cluster 2 (Grupo moderado riesgo de problema de salud mental): Presenta el segundo mayor grupo de pacientes, estos se caracterizan por ser en su mayoría divorciados, ser mayoritariamente mujeres, con respecto a su labor, no hay diferencia marcada en sí tienen empleo formal, informal o solo no tienen empleo, este grupo presenta ligeramente más pacientes que sufren depresión y tienen estudios superiores a la primaria. Asimismo, este grupo tiene los puntajes proemdios de cada item de problemas de salud mental de nivel intermedio.
+
+Cluster 3 (Grupo alto riesgo de problema de salud mental): Es el grupo minoritario, de este grupo, la mayoría son mujeres, la mayoría no tiene un empleo, sufren de ansiedad, sufren de depresión y son mayoritariamente divorciados y solteros. Asimismo, este grupo tiene los puntajes proemdios de cada item de problemas de salud mental de nivel alto.
+
+## Discusión
+
+Cuando se aplicó el algoritmo X-means, se obtuvo 4 clusters. Los clústeres se caracterizaron por tener los siguientes patrones: 
+
+Cluster 1 (Grupo de alto riesgo de problema de salud mental): Este grupo minoritario presenta pacientes que sufren de ansiedad, sufren depresión y en su mayoría son mujeres, notamos también que presentan una formación principalmente de nivel primaria. Asimismo, este grupo tiene los niveles más altos en todos los puntajes de problemas de salud mental.
+
+Cluster 2  (Grupo de moderado-alto riesgo de problema de salud mental): Este grupo presenta pacientes en su mayoría que sufren de ansiedad y depresión, mayoritariamente son de secundaria y son mujeres. Asimismo, este grupo tiene los niveles intermedios altos en todos los puntajes de problemas de salud mental.
+
+---
+
+Cluster 3 (Grupo de moderado-bajo riesgo de problema de salud mental): Este grupo presenta proporción similar entre hombres y mujeres, con igual proporción de pacientes con estudios de secundaria, técnicos y universitarios, presenta menos pacientes viudos, son pacientes que sufren de ansiedad y mayoritariamente de depresión. Asimismo, este grupo tiene los niveles intermedios bajos en todos los puntajes de problemas de salud mental.
+
+Cluster 4 (Grupo bajo riesgo de problema de salud mental) : Este grupo mayoritario se caracteriza por ser en su mayoría hombres, este grupo contiene a pacientes de todos los niveles de estudios, siendo el grupo exclusivo de pacientes con educación primaria, son en mayoría viudos y no sufren de ansiedad y depresión, este grupo de pacientes están casi igualmente proporcionados con respecto a su labor siendo ligeramente mayoría el empleo formal. Asimismo, este grupo tiene los niveles más bajos en todos los puntajes de problemas de salud mental.
+
+
+# Conclusiones
+
+## Conclusiones
+
+Los algoritmos de clusterización utilizados nos permitieron identificar entre 3 o 4 clusters. Todos los clusters se caracterizan por separar a los individuos de acuerdo a un patrón de severidad de los síntomas de problemas de salud mental. En base a este patrón observado, propusimos un nombre para los clústeres mostrados basado en el nivel de severidad.
+
+# Referencias
+
+## Referencias
+
+Gan G, Ma C, Wu J. 2007. Data clustering: theory, algorithms, and applications. SIAM, Society for Industrial and Applied Mathematics ; Alexandria, Va. : American Statistical Association. Philadelphia, Pa. DOI: https://doi.org/10.1137/1.9780898718348
+
+Huang Z. 1998. Extensions to the k-Means Algorithm for Clustering Large Data Sets with Categorical Values. Data Mining and Knowledge Discovery 2, 283–304. DOI: https://doi.org/10.1023/A:1009769707641 
+
+Kaufman L, Rousseeuw PJ. 2005 Finding Groups in Data: An Introduction to Cluster Analysis. John Wiley, Hoboken.  DOI: http://dx.doi.org/10.1002/9780470316801.ch1 
+
+Kassambara A. 2017. Practical Guide to Cluster Analysis in R: Unsupervised Machine Learning. Sthda.com.
+
+---
+
+Mughnyanti M, Efendi S, Zarlis M. 2020. Analysis of determining centroid clustering x-means algorithm with davies-bouldin index evaluation. IOP Conf. Ser.: Mater. Sci. Eng. 725 012128. DOI: http://dx.doi.org/10.1088/1757-899X/725/1/012128
+
+Pelleg D, Moore A. 2000. X-means: Extending k-means with efficient estimation of the number of clusters. In: Proceedings of the 17th International Conference on Machine     Learning. Presented at: 17th International Conference on Machine Learning; June 29-July 2, 2000; Stanford, CA p. 727-734   URL: http:/​/citeseerx.​ist.psu.edu/​viewdoc/​download;jsessionid=B8BE3002265BD61591083E9412FB2C9B?doi=10.​1.​1.​19.​3377&rep=rep1&type=pdf
+
+Shehroz, K., & Shri, K. 2007. Computation of Initial Modes for K-modes Clustering Algorithm using Evidence Accumalatión. IJCAI International Joint Conference on Artificial Intelligence.
